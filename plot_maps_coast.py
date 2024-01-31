@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from osgeo import gdal
-
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.patches as mpatches
@@ -38,7 +37,7 @@ koppen_colors = {
     28: '#c81485',
     29: '#64ffff',
     30: '#6496ff',
-    31: '#6306ff'
+    31: '#6000ff',
 }
 
 koppen_mapping = {
@@ -111,10 +110,10 @@ koppen_mapping_short = {
 
 
 
-# Define the bounding box (min_lon, min_lat, max_lon, max_lat)                                                                                                                                                     
+# Define the bounding box (min_lon, min_lat, max_lon, max_lat)
 #bbox = [36, 20, 93, 63]
 bbox = [44, 33, 90, 56]
-# Function to transform latitude/longitude to pixel coordinates                                                                                                                                                    
+# Function to transform latitude/longitude to pixel coordinates
 def world_to_pixel(geo_matrix, x, y):
     ulX = geo_matrix[0]
     ulY = geo_matrix[3]
@@ -127,24 +126,25 @@ def world_to_pixel(geo_matrix, x, y):
     return (pixel, line)
 
 
-# Function to count categories                                                                                                                                                                                     
-def count_categories(data_array):
-    unique, counts = np.unique(data_array, return_counts=True)
-    return dict(zip(unique, counts))
-
 
 file_1981_2010 = '/p/projects/gvca/data/chelsa_cmip6/envicloud/chelsa/chelsa_V2/GLOBAL/climatologies/1981-2010/bio/CHELSA_kg2_1981-2010_V.2.1.tif'
-
-# Open the TIFF files                                                                                                                                                                                              
+name='historical.png'
+scenario=''
+#file_1981_2010='/p/projects/gvca/data/chelsa_cmip6/envicloud/chelsa/chelsa_V2/GLOBAL/climatologies/2071-2100/GFDL-ESM4/ssp585/bio/CHELSA_kg2_2071-2100_gfdl-esm4_ssp585_V.2.1.tif'
+#name='future_CHELSA_kg2_2071-2100_gfdl-esm4_ssp585_V.2.1.png'
+#scenario = 'ssp585'
+# Open the TIFF files
 dataset_1981_2010 = gdal.Open(file_1981_2010)
-# Get GeoTransform and calculate pixel coordinates                                                                                                                                                                 
+# Get GeoTransform and calculate pixel coordinates
 geo_transform = dataset_1981_2010.GetGeoTransform()
 minx, maxy = world_to_pixel(geo_transform, bbox[0], bbox[1])
 maxx, miny = world_to_pixel(geo_transform, bbox[2], bbox[3])
-# Read the raster data as numpy arrays for the specified region                                                                                                                                                    
-array_1981_2010 = dataset_1981_2010.ReadAsArray(minx, miny, maxx - minx, maxy - miny)
+# Read the raster data as numpy arrays for the specified region
+array_2d = dataset_1981_2010.ReadAsArray(minx, miny, maxx - minx, maxy - miny)
 
-unique_values = np.unique(array_1981_2010)
+unique_values = np.unique(array_2d)
+unique_values_sorted = np.sort(unique_values)
+
 print("Unique values in array:", unique_values)
 # Check if all unique values have a corresponding entry in koppen_mapping
 missing_keys = [value for value in unique_values if value not in koppen_mapping_short]
@@ -152,15 +152,30 @@ print("Missing keys in koppen_mapping:", missing_keys)
 
 
 
-
-
 # Create a ListedColormap from the dictionary
 from matplotlib.colors import ListedColormap
 cmap = ListedColormap([koppen_colors[key] for key in sorted(koppen_colors.keys()) if key in unique_values])
 
-#ax = plt.axes(projection=ccrs.PlateCarree())
-# Plot the data
-#plt.figure(figsize=(10, 10))
+
+
+
+# List of categories you want to plot
+categories_to_plot = [  5,  6,  7,  8,  9, 10, 12, 15, 16, 18, 19, 20, 22, 23, 24, 26, 27,
+       28,30]
+
+# Create a mask for these categories
+mask = np.isin(array_2d, categories_to_plot)
+
+# Create a masked array where only the values of interest are not masked
+masked_array = np.ma.masked_where(~mask, array_2d)
+
+# Now create a color map that includes only the colors for these categories
+selected_colors = [koppen_colors.get(category, 'ignore') for category in categories_to_plot]
+selected_cmap = ListedColormap(selected_colors)
+
+
+
+
 
 
 
@@ -170,45 +185,46 @@ fig, ax = plt.subplots(figsize=(10, 10),
 
 # Existing code to plot your data...
 extent = [44, 90, 33, 56]  # [min_longitude, max_longitude, min_latitude, max_latitude]
-# When you call imshow, use the extent parameter
-plt.imshow(array_1981_2010, cmap=cmap, interpolation='nearest', extent=extent)
-# Add coastlines and country boundaries                                                                                            
+#print(cmap.colors)
+plt.imshow(masked_array, cmap=selected_cmap, interpolation='nearest', extent=extent)
+categories_to_plot = [31]
+# Create a mask for these categories
+mask = np.isin(array_2d, categories_to_plot)
+
+# Create a masked array where only the values of interest are not masked
+masked_array = np.ma.masked_where(~mask, array_2d)
+
+# Now create a color map that includes only the colors for these categories
+selected_colors = [koppen_colors.get(category, 'ignore') for category in categories_to_plot]
+selected_cmap = ListedColormap(selected_colors)
+plt.imshow(masked_array, cmap=selected_cmap, interpolation='nearest', extent=extent)
+
+# Add coastlines and country boundaries
 ax.coastlines()
 ax.add_feature(cfeature.BORDERS)
 
-# Adjust the extent of the map to your bbox                                                                                        
-#ax.set_extent([36, 93, 20, 63])
-
 ax.set_xlabel("Longitude")
 ax.set_ylabel("Latitude")
-# Depending on your data, you might need to adjust the aspect of the image
-#plt.gca().set_aspect('auto')
 
-
-#plt.imshow(array_1981_2010, cmap=cmap, interpolation='nearest')#, origin='upper', transform=ccrs.PlateCarree())
 # Overlay country boundaries and lakes
 countries = cfeature.NaturalEarthFeature(category='cultural', scale='50m', facecolor='none', name='admin_0_countries')
 lakes = cfeature.NaturalEarthFeature(category='physical', scale='50m', facecolor='none', name='lakes')
-#ax.add_feature(countries, edgecolor='black')
-#ax.add_feature(lakes, edgecolor='black')
+
 legend_labels = {value: key for key, value in koppen_mapping_short.items()}
 # Create patches for the legend
 
 patches = [mpatches.Patch(color=koppen_colors[key], label=koppen_mapping_short[key]) for key in unique_values if key in koppen_colors]
-#patches = [mpatches.Patch(color=koppen_colors[key], label=legend_labels[key]) for key in sorted(koppen_colors.keys())]
 
 # Adjust the legend's location
-leg = plt.legend(handles=patches, bbox_to_anchor=(1.02, 1.0) , loc='upper left')
+leg = plt.legend(handles=patches, bbox_to_anchor=(1.0, 1.05) , loc='upper left')
 # Add gridlines and labels
 gl = ax.gridlines(draw_labels=True, linewidth=1, color='gray', alpha=0.5, linestyle='--')
 gl.top_labels = False
 gl.right_labels = False
 
-# Set the extent of the map
-#ax.set_extent([bbox[0], bbox[2], bbox[1], bbox[3]])
+plt.title(scenario)
 
-# Add gridlines, labels, title and display
-##ax.gridlines(draw_labels=True, dms=True, x_inline=False, y_inline=False)
-plt.title('Köppen Climate Classification (1981-2010)')
+plt.savefig(name, format='png', dpi=300, bbox_inches='tight')
+# Count the occurrences of each unique value
+counts = {koppen_mapping_short[val]: np.count_nonzero(array_2d == val) for val in unique_values if val in koppen_mapping_short}
 
-plt.savefig('climate_category.png', format='png', dpi=300, bbox_inches='tight')

@@ -68,8 +68,8 @@ koppen_mapping = {
     27: "Dwb",
     28: "Dwc",
     29: "Dwd",
-    30: "ET ",
-    31: "EF "
+    30: "EF ",
+    31: "ET "
 }
 
 # Define the bounding box (min_lon, min_lat, max_lon, max_lat)
@@ -196,7 +196,7 @@ for k in range(0, 3):
         plt.tight_layout()
 
     # Sort categories for consistent plotting
-    sorted_categories = sorted(all_categories)
+    sorted_categories = all_categories
 
     # Replace category codes with names for plotting
     category_labels = [koppen_mapping.get(category, f"Unknown ({category})") for category in sorted_categories]
