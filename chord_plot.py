@@ -4,13 +4,14 @@ from osgeo import gdal
 import matplotlib.patches as mpatches
 import pickle
 # Number of top migrations to display
+name='historical.png'
 top_n = 20  # Set this to your desired number of top migrations
-scenario='ssp585'
+#scenario='ssp585'
 #scenario='ssp370'
-#scenario='ssp126'
-#time_slice='2071-2100'
+scenario='ssp126'
+time_slice='2071-2100'
 #time_slice='2011-2040'
-time_slice='2041-2070'
+#time_slice='2041-2070'
 koppen_mapping_short = {
     1: "Af ",
     2: "Am ",
@@ -133,7 +134,7 @@ plt.tight_layout()
 
 # Show and save the plot
 plt.show()
-plt.savefig('koppen_classification_aggregated_migrations.png')
+plt.savefig('koppen_classification_aggregated_migrations_'+time_slice+'_'+scenario+'.png')
 
 
 
@@ -271,7 +272,7 @@ def world_to_pixel(geo_matrix, x, y):
 
 
 file_1981_2010 = '/p/projects/gvca/data/chelsa_cmip6/envicloud/chelsa/chelsa_V2/GLOBAL/climatologies/1981-2010/bio/CHELSA_kg2_1981-2010_V.2.1.tif'
-name='historical.png'
+
 scenario=''
 #file_1981_2010='/p/projects/gvca/data/chelsa_cmip6/envicloud/chelsa/chelsa_V2/GLOBAL/climatologies/2071-2100/GFDL-ESM4/ssp585/bio/CHELSA_kg2_2071-2100_gfdl-esm4_ssp585_V.2.1.tif'
 #name='future_CHELSA_kg2_2071-2100_gfdl-esm4_ssp585_V.2.1.png'
