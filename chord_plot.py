@@ -3,15 +3,27 @@ import matplotlib.pyplot as plt
 from osgeo import gdal
 import matplotlib.patches as mpatches
 import pickle
+
+#      -----------------------------------
+#              N A M E  L I S T
 # Number of top migrations to display
 name='historical.png'
-top_n = 20  # Set this to your desired number of top migrations
-#scenario='ssp585'
+top_n = 30  # Set this to your desired number of top migrations
+x_max_lim = 3500000
+scenario='ssp585'
 #scenario='ssp370'
-scenario='ssp126'
+#scenario='ssp126'
 time_slice='2071-2100'
 #time_slice='2011-2040'
 #time_slice='2041-2070'
+
+#          E N D  OF N A M E L I S T
+#      -------------------------------------
+
+
+
+
+
 koppen_mapping_short = {
     1: "Af ",
     2: "Am ",
@@ -47,8 +59,8 @@ koppen_mapping_short = {
 }
 
 # Define the bounding box (min_lon, min_lat, max_lon, max_lat)
-## bbox = [36, 20, 93, 63] #Central Asia
-bbox = [65, 36, 76, 42] # Tajikistan
+bbox = [45, 34, 90, 56] #Central Asia
+##bbox = [65, 36, 76, 42] # Tajikistan
 # Function to transform latitude/longitude to pixel coordinates
 def world_to_pixel(geo_matrix, x, y):
     ulX = geo_matrix[0]
@@ -126,10 +138,13 @@ error = [std_devs[change] for change, _ in sorted_means]
 # Create the bar plot with error bars
 plt.figure(figsize=(10, 8))
 plt.barh(migrations, mean_counts, xerr=error, color='skyblue')
-plt.xlabel('Mean Count of Migrations')
-plt.ylabel('Migration Type')
-plt.title(f'Top {top_n} Köppen Classification Migrations (Mean & Std Dev)')
+plt.xlabel('Mean Count of Migrations (km$^2$)', fontsize= 15)
+plt.ylabel('Migration Type', fontsize= 15)
+plt.xticks(fontsize= 12)
+plt.yticks(fontsize= 15)
+#plt.title(f'Top {top_n} Köppen Classification Migrations')
 plt.gca().invert_yaxis()
+plt.xlim(0, x_max_lim)
 plt.tight_layout()
 
 # Show and save the plot
