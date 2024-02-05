@@ -8,8 +8,9 @@ import pickle
 #              N A M E  L I S T
 # Number of top migrations to display
 name='historical.png'
-top_n = 30  # Set this to your desired number of top migrations
-x_max_lim = 3500000
+#name='ssp585_2071-2100_spain.png'
+top_n = 20  # Set this to your desired number of top migrations
+x_max_lim = 3000000
 scenario='ssp585'
 #scenario='ssp370'
 #scenario='ssp126'
@@ -61,6 +62,7 @@ koppen_mapping_short = {
 # Define the bounding box (min_lon, min_lat, max_lon, max_lat)
 bbox = [45, 34, 90, 56] #Central Asia
 ##bbox = [65, 36, 76, 42] # Tajikistan
+##bbox = [-10, 36, 4, 44] #Spain 
 # Function to transform latitude/longitude to pixel coordinates
 def world_to_pixel(geo_matrix, x, y):
     ulX = geo_matrix[0]
@@ -319,8 +321,9 @@ cmap = ListedColormap([koppen_colors[key] for key in sorted(koppen_colors.keys()
 
 
 # List of categories you want to plot
-categories_to_plot = [  5,  6,  7,  8,  9, 10, 12, 15, 16, 18, 19, 20, 22, 23, 24, 26, 27,
-       28,30]
+categories_to_plot = unique_values_sorted
+#categories_to_plot = [  5,  6,  7,  8,  9, 10, 12, 15, 16, 18, 19, 20, 22, 23, 24, 26, 27,
+#       28,30]
 
 # Create a mask for these categories
 mask = np.isin(array_2d, categories_to_plot)
@@ -346,17 +349,19 @@ fig, ax = plt.subplots(figsize=(10, 10),
 extent = [bbox[0], bbox[2], bbox[1], bbox[3]]  # [min_longitude, max_longitude, min_latitude, max_latitude]
 #print(cmap.colors)
 plt.imshow(masked_array, cmap=selected_cmap, interpolation='nearest', extent=extent)
-categories_to_plot = [31]
-# Create a mask for these categories
-mask = np.isin(array_2d, categories_to_plot)
+for categories_to_plot in unique_values_sorted:
 
-# Create a masked array where only the values of interest are not masked
-masked_array = np.ma.masked_where(~mask, array_2d)
+    categories_to_plot = [categories_to_plot]
+    # Create a mask for these categories
+    mask = np.isin(array_2d, categories_to_plot)
 
-# Now create a color map that includes only the colors for these categories
-selected_colors = [koppen_colors.get(category, 'ignore') for category in categories_to_plot]
-selected_cmap = ListedColormap(selected_colors)
-plt.imshow(masked_array, cmap=selected_cmap, interpolation='nearest', extent=extent)
+    # Create a masked array where only the values of interest are not masked
+    masked_array = np.ma.masked_where(~mask, array_2d)
+
+    # Now create a color map that includes only the colors for these categories
+    selected_colors = [koppen_colors.get(category, 'ignore') for category in categories_to_plot]
+    selected_cmap = ListedColormap(selected_colors)
+    plt.imshow(masked_array, cmap=selected_cmap, interpolation='nearest', extent=extent)
 
 # Add coastlines and country boundaries
 ax.coastlines()
