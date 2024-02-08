@@ -3,11 +3,11 @@ import matplotlib.pyplot as plt
 from osgeo import gdal
 import matplotlib.patches as mpatches
 import pickle
-
+import os 
 #      -----------------------------------
 #              N A M E  L I S T
 # Number of top migrations to display
-name='historical.png'
+name='historical_middle_CA.png'
 #name='ssp585_2071-2100_spain.png'
 top_n = 20  # Set this to your desired number of top migrations
 x_max_lim = 3000000
@@ -62,7 +62,10 @@ koppen_mapping_short = {
 # Define the bounding box (min_lon, min_lat, max_lon, max_lat)
 bbox = [45, 34, 90, 56] #Central Asia
 ##bbox = [65, 36, 76, 42] # Tajikistan
-##bbox = [-10, 36, 4, 44] #Spain 
+##bbox = [-10, 36, 4, 44] #Spain
+##bbox = [-20, 0, 53, 50] # Sub-Saharan Africa  
+##bbox = [25, 12, 63, 42] # Middle east
+
 # Function to transform latitude/longitude to pixel coordinates
 def world_to_pixel(geo_matrix, x, y):
     ulX = geo_matrix[0]
@@ -288,11 +291,17 @@ def world_to_pixel(geo_matrix, x, y):
 
 
 
-file_1981_2010 = '/p/projects/gvca/data/chelsa_cmip6/envicloud/chelsa/chelsa_V2/GLOBAL/climatologies/1981-2010/bio/CHELSA_kg2_1981-2010_V.2.1.tif'
+#file_1981_2010 = '/p/projects/gvca/data/chelsa_cmip6/envicloud/chelsa/chelsa_V2/GLOBAL/climatologies/1981-2010/bio/CHELSA_kg2_1981-2010_V.2.1.tif'
+#models = [dir_models+'GFDL-ESM4/'+scenario+'/bio/CHELSA_kg2_'+time_slice+'_gfdl-esm4_'+scenario+'_V.2.1.tif',
+#dir_models+'IPSL-CM6A-LR/'+scenario+'/bio/CHELSA_kg2_'+time_slice+'_ipsl-cm6a-lr_'+scenario+'_V.2.1.tif',
+#dir_models+'MPI-ESM1-2-HR/'+scenario+'/bio/CHELSA_kg2_'+time_slice+'_mpi-esm1-2-hr_'+scenario+'_V.2.1.tif',
+#dir_models+'MRI-ESM2-0/'+scenario+'/bio/CHELSA_kg2_'+time_slice+'_mri-esm2-0_'+scenario+'_V.2.1.tif',
+#dir_models+'UKESM1-0-LL/'+scenario+'/bio/CHELSA_kg2_'+time_slice+'_ukesm1-0-ll_'+scenario+'_V.2.1.tif']
 
 scenario=''
 #file_1981_2010='/p/projects/gvca/data/chelsa_cmip6/envicloud/chelsa/chelsa_V2/GLOBAL/climatologies/2071-2100/GFDL-ESM4/ssp585/bio/CHELSA_kg2_2071-2100_gfdl-esm4_ssp585_V.2.1.tif'
-#name='future_CHELSA_kg2_2071-2100_gfdl-esm4_ssp585_V.2.1.png'
+file_1981_2010=models[4]
+name=os.path.basename(file_1981_2010)+'_CA.png'
 #scenario = 'ssp585'
 # Open the TIFF files
 dataset_1981_2010 = gdal.Open(file_1981_2010)
